@@ -307,13 +307,21 @@ i due approcci, non fa parte della linea principale.
 ## Il team
 
 Progetto sviluppato da **Diego Bruno**, **Marco Crisafulli** e
-**Sebastiano Giannitti**.
+**Sebastiano Giannitti**. Il corso richiedeva di dichiarare esplicitamente
+l'attività di ciascun componente; la ripartizione, sprint per sprint, è quella
+presentata alla discussione finale ([slide](docs/presentazione_finale.pdf)):
 
-<!-- TODO: sostituire con la ripartizione reale dalla presentazione LaTeX.
-     Il corso richiedeva esplicitamente di presentare "l'attività specifica di
-     ciascun componente del team" (TemaFinaleNote). -->
+| Sprint | Diego Bruno | Marco Crisafulli | Sebastiano Giannitti |
+|---|---|---|---|
+| **0** — Analisi e modello logico | Requisiti e formalizzazione: classificazione (CRS, PRD, ROB) e mappatura delle entità di dominio | Modellazione QAK: prima architettura logica e protocollo dei messaggi | Problem analysis e test plan |
+| **1** — Core business logic | **Modellazione della `hold`**: strutture dati Kotlin, mappatura logica/fisica delle coordinate | Clean architecture: `productpolice` e parsing JSON verso i servizi esterni | Orchestrazione robot: FSM del `cargorobot`, test plan sugli edge case |
+| **2** — IoT e hardware | **Setup hardware**: GPIO del Raspberry Pi, script Python per sonar HC-SR04 e LED | Setup di rete: broker MQTT e interfacciamento tra componenti | Adapter logic: `sonaradapter`, da eventi fisici a risposte logiche |
+| **3** — Web GUI e monitoraggio | **Test di integrazione** tra moduli e componenti | Produzione dei deliverable: containerizzazione, network Docker, configurazioni | System observability e GUI |
 
-Ripartizione delle attività: _da completare_.
+Il mio contributo principale è quindi la **modellazione della stiva** — lo stesso
+componente estratto in `CargoHold` e coperto dai test di questo repository — il
+**livello hardware** del sonar ([script Python](sprint2/sonarLed2025/resources/python/))
+e la **verifica di integrazione**.
 
 Il repository originale del team, con la storia completa dei commit, è
 [MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti](https://github.com/MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti).
