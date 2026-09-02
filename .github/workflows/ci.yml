@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, showcase ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Business logic tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Run tests
+        working-directory: sprint3/cargoservice_sprint3
+        run: ./gradlew test --no-daemon
+
+      - name: Publish test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: sprint3/cargoservice_sprint3/build/reports/tests/test
