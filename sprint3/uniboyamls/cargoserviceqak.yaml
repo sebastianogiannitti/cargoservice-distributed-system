@@ -6,12 +6,17 @@ services:
     image: docker.io/natbodocker/cargoserviceqak:1.0
     environment:
       - MONGO_HOST=mongodb
-      - SERVICE_IP=${SERVICE_IP}
+      # Su Eureka si pubblica il nome del container: risolvibile via DNS Docker
+      # da tutti i servizi della rete iss-network, senza dipendere dall'IP
+      # dell'host. Vedi docs/DEMO.md per l'esecuzione fuori da Docker.
+      - SERVICE_IP=cargoserviceqak
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
     ports:
       - 8111:8111/tcp
       - 8111:8111/udp
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
     networks:
       - iss-network
 
@@ -21,15 +26,21 @@ services:
     image: cargoholdservice_local:latest
     #image: cargoholdservice:1.0
     environment: #needed for _local image, not needed for sa image
-      - SERVICE_IP=${SERVICE_IP} #specify address else docker ip address is published on eureka
+      - SERVICE_IP=cargoholdservice
+      # Senza questa variabile il client ricade sulla lista di
+      # eureka-client.properties, che parte da localhost e contiene un IP
+      # obsoleto: checkEureka() fallisce e il servizio non si registra.
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
     ports:
       - 8888:8888/tcp
       - 8095:8095/tcp
       - 8096:8096/tcp
       - 5683:5683/udp
     depends_on:
-      - cargoserviceqak
-      - eureka
+      eureka:
+        condition: service_healthy
+      cargoserviceqak:
+        condition: service_started
     networks:
       - iss-network
 
@@ -48,12 +59,14 @@ services:
     environment:
       - VIRTUAL_ENV=wenv                         #Used by uniborobots.robotSupport.create
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - SERVICE_HOST=${SERVICE_IP}     #basicrobot24 per app che usano basicrobot in docker
-      - SERVICE_IP=${SERVICE_IP}
+      - SERVICE_HOST=basicrobot24
+      - SERVICE_IP=basicrobot24
       - MQTTBROKER=mosquitto
     depends_on:
-      - wenv
-      - eureka
+      eureka:
+        condition: service_healthy
+      wenv:
+        condition: service_started
     networks:
       - iss-network
   wenv:
@@ -72,12 +85,16 @@ services:
     image: usermock:2.0
     environment:
       - EUREKA_INSTANCE_HOSTNAME=usermock
+      - SERVICE_IP=usermock
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
     ports:
       - 8887:8887/tcp
       - 8887:8887/udp
     depends_on:
-      - cargoholdservice
-      - eureka
+      eureka:
+        condition: service_healthy
+      cargoholdservice:
+        condition: service_started
     networks:
       - iss-network
 
@@ -138,10 +155,13 @@ services:
     networks:
       - iss-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8761"]
+      # Interroga il registro, non la dashboard: risponde 200 solo quando
+      # Eureka e' pronto ad accettare registrazioni.
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/apps"]
       interval: 5s
       timeout: 3s
-      retries: 10
+      retries: 20
+      start_period: 10s
 
 networks:
     iss-network:

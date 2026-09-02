@@ -67,29 +67,23 @@ cd ../userMock
 docker build -t usermock:2.0 .
 ```
 
-### 2. Configurare l'indirizzo dell'host
-
-Eureka pubblica agli altri servizi l'indirizzo con cui contattarli, quindi
-serve l'IP reale della macchina, non `localhost`:
+### 2. Avviare
 
 ```bash
 cd ../uniboyamls
-cp .env.example .env
-sed -i "s/^SERVICE_IP=.*/SERVICE_IP=$(hostname -I | awk '{print $1}')/" .env
-cat .env
-```
-
-### 3. Avviare
-
-```bash
 docker network create iss-network   # solo la prima volta
 docker compose -f cargoserviceqak.yaml up
 ```
 
+Non serve configurare indirizzi: ogni servizio si registra su Eureka con il
+proprio **nome di container**, che Docker risolve all'interno della rete
+`iss-network`. Il browser non passa da Eureka — raggiunge la GUI sulle porte
+pubblicate su `localhost`.
+
 Le immagini pubbliche vengono scaricate al primo avvio: circa 2 GB in totale,
 mettere in conto qualche minuto.
 
-### 4. Verificare che il mock stia pubblicando
+### 3. Verificare che il mock stia pubblicando
 
 ```bash
 docker logs sonarmock
@@ -98,7 +92,7 @@ docker exec mosquitto mosquitto_sub -t sonardata -C 3
 
 Attese tre righe `msg(sonardata,event,mind,none,distance(5),N)`.
 
-### 5. Aprire la GUI e registrare
+### 4. Aprire la GUI e registrare
 
 La GUI è su **http://localhost:8095/hold.html**.
 
@@ -139,3 +133,37 @@ e lo slot prenotato viene rilasciato con `slotrelease`.
 ```bash
 docker compose -f cargoserviceqak.yaml down
 ```
+
+## Se qualcosa non si registra su Eureka
+
+Sintomo tipico nei log di un servizio:
+
+```
+EurekaUniboUtils | checkEureka Errore: Impossibile raggiungere il server.
+NON VA EUREKA
+```
+
+`checkEureka()` fa solo due tentativi e, se falliscono, il servizio **non
+riprova piu'**: resta su senza essersi registrato, e chi lo cerca non lo trova.
+
+Due cause, entrambe gestite nel compose:
+
+1. **Ordine di avvio.** `depends_on` da solo attende che il container parta,
+   non che il servizio sia pronto. Eureka impiega qualche decina di secondi:
+   per questo i servizi usano `condition: service_healthy` sull'healthcheck di
+   Eureka.
+
+2. **Lista di URL sbagliata.** Senza la variabile d'ambiente il client ricade
+   su `eureka-client.properties`, che comincia con `http://localhost:8761/`
+   (dentro un container non esiste) e contiene un IP obsoleto che produce
+   `NoRouteToHostException` con timeout lunghi. La variabile
+   `EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/` ha la
+   precedenza e risolve.
+
+Per controllare chi si e' registrato:
+
+```bash
+curl -s http://localhost:8761/eureka/apps | grep -oE '<name>[^<]*|<ipAddr>[^<]*'
+```
+
+Devono comparire `CTXCARGOHOLDSERVICE`, `CTXCARGOSERVICE` e `CTXUSERMOCK`.

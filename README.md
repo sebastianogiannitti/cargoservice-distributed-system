@@ -238,7 +238,6 @@ cd sprint3/cargoservice_sprint3
 ```bash
 docker network create iss-network
 cd sprint3/uniboyamls
-cp .env.example .env && sed -i "s/^SERVICE_IP=.*/SERVICE_IP=$(hostname -I | awk '{print $1}')/" .env
 docker compose -f cargoserviceqak.yaml up
 ```
 
@@ -253,10 +252,10 @@ Il file compose avvia 8 servizi: `cargoholdservice` (il nostro sistema),
 virtuale), `usermock` (client di test), `sonarmock` (sostituto del sonar
 fisico), `mosquitto` (MQTT), `mongodb` ed `eureka` (service discovery).
 
-> **Nota sugli indirizzi.** Le variabili `SERVICE_IP` nel file compose vanno
-> impostate all'IP della macchina host: Eureka pubblica quell'indirizzo agli
-> altri servizi, e l'IP interno del container non è raggiungibile dall'esterno.
-> Si veda [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+> **Nota sul service discovery.** Ogni servizio si registra su Eureka con il
+> proprio nome di container, risolto dal DNS di Docker sulla rete
+> `iss-network`. Se esegui un componente fuori da Docker devi invece
+> pubblicare l'IP dell'host: si veda [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Test
 
