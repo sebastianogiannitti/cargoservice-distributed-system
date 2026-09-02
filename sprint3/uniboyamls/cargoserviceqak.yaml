@@ -6,7 +6,7 @@ services:
     image: docker.io/natbodocker/cargoserviceqak:1.0
     environment:
       - MONGO_HOST=mongodb
-      - SERVICE_IP=10.152.235.74
+      - SERVICE_IP=${SERVICE_IP}
     ports:
       - 8111:8111/tcp
       - 8111:8111/udp
@@ -21,7 +21,7 @@ services:
     image: cargoholdservice_local:latest
     #image: cargoholdservice:1.0
     environment: #needed for _local image, not needed for sa image
-      - SERVICE_IP=10.152.235.74 #specify address else docker ip address is published on eureka
+      - SERVICE_IP=${SERVICE_IP} #specify address else docker ip address is published on eureka
     ports:
       - 8888:8888/tcp
       - 8095:8095/tcp
@@ -48,8 +48,8 @@ services:
     environment:
       - VIRTUAL_ENV=wenv                         #Used by uniborobots.robotSupport.create
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka/
-      - SERVICE_HOST=10.152.235.74     #basicrobot24 per app che usano basicrobot in docker
-      - SERVICE_IP=10.152.235.74
+      - SERVICE_HOST=${SERVICE_IP}     #basicrobot24 per app che usano basicrobot in docker
+      - SERVICE_IP=${SERVICE_IP}
       - MQTTBROKER=mosquitto
     depends_on:
       - wenv
