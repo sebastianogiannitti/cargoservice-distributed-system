@@ -28,3 +28,13 @@ package-lock.json
 docker/
 /.metadata/
 /src-gen/
+
+# OS / IDE
+.DS_Store
+*.swp
+.settings/
+.vscode/
+
+# Gradle
+.gradle/
+build/
