@@ -238,15 +238,20 @@ cd sprint3/cargoservice_sprint3
 ```bash
 docker network create iss-network
 cd sprint3/uniboyamls
+cp .env.example .env && sed -i "s/^SERVICE_IP=.*/SERVICE_IP=$(hostname -I | awk '{print $1}')/" .env
 docker compose -f cargoserviceqak.yaml up
 ```
 
 Poi apri la GUI su **http://localhost:8095/hold.html**.
 
+Due immagini vanno costruite in locale prima del primo avvio; la procedura
+completa, incluso il mock che sostituisce il sonar fisico, è in
+[docs/DEMO.md](docs/DEMO.md).
+
 Il file compose avvia 8 servizi: `cargoholdservice` (il nostro sistema),
 `cargoserviceqak` (productservice), `basicrobot24` e `wenv` (robot e mondo
-virtuale), `usermock` (client di test), `mosquitto` (MQTT), `mongodb` ed
-`eureka` (service discovery).
+virtuale), `usermock` (client di test), `sonarmock` (sostituto del sonar
+fisico), `mosquitto` (MQTT), `mongodb` ed `eureka` (service discovery).
 
 > **Nota sugli indirizzi.** Le variabili `SERVICE_IP` nel file compose vanno
 > impostate all'IP della macchina host: Eureka pubblica quell'indirizzo agli

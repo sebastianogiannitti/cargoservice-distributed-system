@@ -1,1 +1,8 @@
-rootProject.name = "cargoservice"
+plugins {
+    // Consente a Gradle di scaricare automaticamente il JDK 17 della toolchain.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+// Deve corrispondere al nome dell'archivio atteso dal dockerfile
+// (usermock-1.0.tar) e allo script di avvio in bin/.
+rootProject.name = "usermock"

@@ -35,8 +35,8 @@ services:
 
   basicrobot24:
     container_name: basicrobot24
-    image: basicrobot:3.0
-    #image : docker.io/natbodocker/basicrobot24:3.0
+    # immagine pubblica: basicrobot:3.0 era un tag costruito localmente
+    image: docker.io/natbodocker/basicrobot24:3.0
     mem_limit: 512m
     volumes:
       - ./basicrobotConfig.json:/basicrobot24-1.0/bin/basicrobotConfig.json
@@ -78,6 +78,25 @@ services:
     depends_on:
       - cargoholdservice
       - eureka
+    networks:
+      - iss-network
+
+  # Sostituisce il sonar fisico HC-SR04 del Raspberry Pi: pubblica eventi
+  # sonardata sul broker MQTT nello stesso formato che emetterebbe l'attore
+  # mind del progetto sonarLed2025. Vedi sonarmock.sh.
+  sonarmock:
+    container_name: sonarmock
+    image: eclipse-mosquitto:1.6.15
+    volumes:
+      - ./sonarmock.sh:/sonarmock.sh:ro
+    environment:
+      - BROKER=mosquitto
+      - SONAR_DISTANCE=5      # <= DFREE/2 -> container presente alla IOPort
+      - FAILURE_EVERY=0       # >0 per simulare guasti periodici del sonar
+      - FAILURE_LEN=3
+    entrypoint: ["sh", "/sonarmock.sh"]
+    depends_on:
+      - mosquitto
     networks:
       - iss-network
 
