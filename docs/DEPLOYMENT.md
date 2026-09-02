@@ -1,6 +1,6 @@
 # Deployment
 
-Il sistema e composto da 8 servizi containerizzati, orchestrati da
+Il sistema è composto da 8 servizi containerizzati, orchestrati da
 [`sprint3/uniboyamls/cargoserviceqak.yaml`](../sprint3/uniboyamls/cargoserviceqak.yaml).
 
 ## Prerequisiti
@@ -36,7 +36,7 @@ hostname -I | awk '{print $1}'
 
 e sostituirlo nelle occorrenze di `10.152.235.74` nel file compose.
 
-> Questo e un limite noto del progetto: gli indirizzi andrebbero esternalizzati
+> Questo è un limite noto del progetto: gli indirizzi andrebbero esternalizzati
 > in un file `.env` invece che ripetuti nel compose.
 
 ## Porte esposte

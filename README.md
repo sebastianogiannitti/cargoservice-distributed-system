@@ -1,17 +1,17 @@
 # cargoservice — automazione del carico merci in stiva
 
-Sistema distribuito che automatizza il caricamento di container in la stiva di
+Sistema distribuito che automatizza il caricamento di container nella stiva di
 una nave cargo per mezzo di un robot a guida differenziale, con stato della
 stiva osservabile in tempo reale da una web GUI.
 
 Progetto finale di **Ingegneria dei Sistemi Software** (prof. A. Natali,
-Universita di Bologna, a.a. 2024/2025), sviluppato in team da 3 persone lungo
+Università di Bologna, a.a. 2024/2025), sviluppato in team da 3 persone lungo
 4 sprint.
 
 > Lo scopo del tema d'anno non era (solo) risolvere il problema, ma avere un
 > **caso di studio su cui ragionare sul processo di costruzione del software**.
-> Questo README e organizzato di conseguenza: prima cosa fa il sistema, poi
-> perche e fatto cosi.
+> Questo README è organizzato di conseguenza: prima cosa fa il sistema, poi
+> perché è fatto così.
 
 ---
 
@@ -21,8 +21,8 @@ Universita di Bologna, a.a. 2024/2025), sviluppato in team da 3 persone lungo
 - [Demo](#demo)
 - [Architettura](#architettura)
 - [Il flusso di una richiesta](#il-flusso-di-una-richiesta)
-- [Osservabilita: dalla stiva al browser](#osservabilita-dalla-stiva-al-browser)
-- [Perche un DSL ad attori](#perche-un-dsl-ad-attori)
+- [Osservabilità: dalla stiva al browser](#osservabilità-dalla-stiva-al-browser)
+- [Perché un DSL ad attori](#perché-un-dsl-ad-attori)
 - [Come eseguirlo](#come-eseguirlo)
 - [Test](#test)
 - [Il processo: gli sprint](#il-processo-gli-sprint)
@@ -37,22 +37,22 @@ Una compagnia di trasporto marittimo vuole automatizzare il carico di merci
 nella stiva di una nave. I prodotti sono registrati in un servizio esterno
 (`productservice`) che ne restituisce identificativo e peso.
 
-La stiva e un'area rettangolare con una porta di ingresso (IOPort) e **4 slot**
+La stiva è un'area rettangolare con una porta di ingresso (IOPort) e **4 slot**
 per i container. Un sonar davanti alla IOPort rileva la presenza di un
 container. Il sistema da costruire, `cargoservice`, deve:
 
 1. accettare o rifiutare richieste di carico — rifiuto se il peso supera la
-   portata massima della nave o se la stiva e piena;
+   portata massima della nave o se la stiva è piena;
 2. assegnare uno slot al prodotto accettato e attendere il container alla IOPort,
    **senza elaborare altre richieste nel frattempo**;
 3. rilevare col sonar la presenza del container alla IOPort;
 4. far depositare il container nello slot riservato dal `cargorobot`, che poi
    torna alla posizione HOME;
 5. mostrare lo stato corrente della stiva su una **web GUI aggiornata dinamicamente**;
-6. interrompere l'attivita e accendere un LED se il sonar misura una distanza
+6. interrompere l'attività e accendere un LED se il sonar misura una distanza
    anomala per almeno 3 secondi (possibile guasto).
 
-Il testo integrale del committente e in
+Il testo integrale del committente è in
 [userDocs/TemaFinale25.pdf](userDocs/TemaFinale25.pdf).
 
 ## Demo
@@ -65,7 +65,7 @@ Il testo integrale del committente e in
 
 ## Architettura
 
-Il sistema e distribuito su piu **contesti** (nodi computazionali autonomi).
+Il sistema è distribuito su più **contesti** (nodi computazionali autonomi).
 I componenti in grigio sono forniti dal committente; quelli in blu sono stati
 sviluppati da noi.
 
@@ -113,17 +113,17 @@ flowchart LR
     class ps,br,mind,user fornito
 ```
 
-Ogni riquadro e un **contesto qak**: un processo autonomo, deployabile come
+Ogni riquadro è un **contesto qak**: un processo autonomo, deployabile come
 container separato. La scoperta reciproca avviene tramite **Eureka**, per cui i
 contesti si dichiarano `host="discoverable"` e non hanno indirizzi cablati.
 
-Il modello eseguibile completo e in
+Il modello eseguibile completo è in
 [`sprint3/cargoservice_sprint3/src/cargoservice.qak`](sprint3/cargoservice_sprint3/src/cargoservice.qak).
 
 ## Il flusso di una richiesta
 
-`cargoservice` e una macchina a stati finiti che elabora **una richiesta per
-volta** — e il modo in cui il requisito 2 ("nel frattempo altre richieste non
+`cargoservice` è una macchina a stati finiti che elabora **una richiesta per
+volta** — è il modo in cui il requisito 2 ("nel frattempo altre richieste non
 sono elaborate") viene soddisfatto per costruzione, non con un lock.
 
 ```mermaid
@@ -162,9 +162,9 @@ sequenceDiagram
 In caso di fallimento a valle della prenotazione, `cargoservice` invia
 `slotrelease(SLOT)` alla stiva: lo slot riservato non resta bloccato.
 
-## Osservabilita: dalla stiva al browser
+## Osservabilità: dalla stiva al browser
 
-Il requisito della GUI dinamica e stato risolto **senza polling**. La catena:
+Il requisito della GUI dinamica è stato risolto **senza polling**. La catena:
 
 ```mermaid
 flowchart LR
@@ -176,22 +176,22 @@ flowchart LR
 Il ragionamento dietro questa scelta, in breve:
 
 - il polling HTTP introduce latenza artificiale e carico inutile su un sistema
-  gia event-driven;
-- **CoAP observe** notifica i client quando la risorsa cambia, ed e il
+  già event-driven;
+- **CoAP observe** notifica i client quando la risorsa cambia, ed è il
   meccanismo naturale in questo dominio — ma il browser non parla CoAP;
 - serve quindi un **adapter**: `WsServer` traduce le notifiche in messaggi
   WebSocket, senza conoscere la semantica dello stato che trasporta.
 
-L'attore `hold` e l'unico componente che tocca `HoldStateResource`. La GUI non
-accede mai allo stato interno degli attori: la risorsa CoAP e il contratto
+L'attore `hold` è l'unico componente che tocca `HoldStateResource`. La GUI non
+accede mai allo stato interno degli attori: la risorsa CoAP è il contratto
 pubblico tra dominio e presentazione.
 
-## Perche un DSL ad attori
+## Perché un DSL ad attori
 
-Il sistema e modellato in **qak**, un linguaggio di modellazione eseguibile
+Il sistema è modellato in **qak**, un linguaggio di modellazione eseguibile
 sviluppato per il corso (DSL definito con Xtext, che genera Kotlin).
 
-La motivazione non e "era il linguaggio del corso". I requisiti descrivono
+La motivazione non è "era il linguaggio del corso". I requisiti descrivono
 componenti che *dialogano*: richieste con risposta, notifiche asincrone,
 sottoscrizioni a eventi. In Java o Kotlin puri questi concetti non esistono
 come costrutti: vanno ricostruiti a mano con thread, code e callback, e la
@@ -208,8 +208,8 @@ qak colma questo **abstraction gap** rendendo primitivi del linguaggio:
 | Notifica broadcast | `Event` (su MQTT) |
 | Comportamento | macchina a stati finiti esplicita |
 
-Il vantaggio pratico: la macchina a stati di `cargoservice` **e** il modello,
-non un commento che descrive il codice. Il modello e eseguibile, quindi
+Il vantaggio pratico: la macchina a stati di `cargoservice` **è** il modello,
+non un commento che descrive il codice. Il modello è eseguibile, quindi
 verificabile con il committente prima di scrivere l'implementazione.
 
 Il prezzo: tooling legato a Eclipse, codice generato poco leggibile in debug, e
@@ -250,12 +250,12 @@ virtuale), `usermock` (client di test), `mosquitto` (MQTT), `mongodb` ed
 
 > **Nota sugli indirizzi.** Le variabili `SERVICE_IP` nel file compose vanno
 > impostate all'IP della macchina host: Eureka pubblica quell'indirizzo agli
-> altri servizi, e l'IP interno del container non e raggiungibile dall'esterno.
+> altri servizi, e l'IP interno del container non è raggiungibile dall'esterno.
 > Si veda [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Test
 
-La business logic della stiva e verificata da una suite di unit test che
+La business logic della stiva è verificata da una suite di unit test che
 riproduce il **Test Plan** formalizzato nella chronicle dello Sprint 1:
 
 ```bash
@@ -267,7 +267,7 @@ stiva piena, payload invalido, ciclo prenotazione/rilascio, mappatura slot →
 coordinate — sono in
 [`CargoHoldTest.kt`](sprint3/cargoservice_sprint3/src/test/kotlin/it/unibo/hold/CargoHoldTest.kt).
 
-Per renderli possibili la logica di dominio e stata estratta dall'attore in
+Per renderli possibili la logica di dominio è stata estratta dall'attore in
 [`CargoHold.kt`](sprint3/cargoservice_sprint3/src/main/kotlin/it/unibo/hold/CargoHold.kt),
 una classe pura senza dipendenze dall'infrastruttura ad attori. L'attore `hold`
 resta responsabile del protocollo; le regole di business sono verificabili in
@@ -282,9 +282,9 @@ totPeso -= slotPeso[idx]  // ...e quindi sottrae zero
 ```
 
 Il peso totale non calava mai al rilascio di uno slot. Ogni richiesta rifiutata
-dopo aver prenotato uno slot lasciava il proprio peso nel conteggio, finche la
+dopo aver prenotato uno slot lasciava il proprio peso nel conteggio, finché la
 stiva rispondeva `OVERWEIGHT` anche da vuota. In `CargoHold` il carico corrente
-e derivato dagli slot, quindi l'incoerenza non e piu rappresentabile.
+è derivato dagli slot, quindi l'incoerenza non e più rappresentabile.
 
 ## Il processo: gli sprint
 
@@ -302,7 +302,7 @@ La cartella [`sprint1_pojoHold/`](sprint1_pojoHold/) contiene una variante
 esplorativa in cui la stiva era un POJO anziche un attore: utile per confrontare
 i due approcci, non fa parte della linea principale.
 
-**La versione finale e [`sprint3/cargoservice_sprint3/`](sprint3/cargoservice_sprint3/).**
+**La versione finale è [`sprint3/cargoservice_sprint3/`](sprint3/cargoservice_sprint3/).**
 
 ## Il team
 
@@ -310,42 +310,42 @@ Progetto sviluppato da **Diego Bruno**, **Marco Crisafulli** e
 **Sebastiano Giannitti**.
 
 <!-- TODO: sostituire con la ripartizione reale dalla presentazione LaTeX.
-     Il corso richiedeva esplicitamente di presentare "l'attivita specifica di
+     Il corso richiedeva esplicitamente di presentare "l'attività specifica di
      ciascun componente del team" (TemaFinaleNote). -->
 
-Ripartizione delle attivita: _da completare_.
+Ripartizione delle attività: _da completare_.
 
-Il repository originale del team, con la storia completa dei commit, e
+Il repository originale del team, con la storia completa dei commit, è
 [MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti](https://github.com/MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti).
 
 ## Limiti noti e cosa farei diversamente
 
-Elenco onesto di cio che, rifacendolo, cambierei.
+Elenco onesto di ciò che, rifacendolo, cambierei.
 
-**Sincronizzazione basata su ritardi.** In piu punti il modello usa `delay`
+**Sincronizzazione basata su ritardi.** In più punti il modello usa `delay`
 fisso al posto di una vera attesa di evento — per esempio `delay 5000` dopo aver
-interrogato la stiva. Funziona nella demo ma e fragile: sotto carico o con
-latenza di rete il timing salta. La transizione `whenReply` c'e gia, il `delay`
-e ridondante e andrebbe rimosso.
+interrogato la stiva. Funziona nella demo ma è fragile: sotto carico o con
+latenza di rete il timing salta. La transizione `whenReply` c'è già, il `delay`
+è ridondante e andrebbe rimosso.
 
-**Il requisito dei 3 secondi e approssimato.** `sonaradapter` campiona due volte
+**Il requisito dei 3 secondi è approssimato.** `sonaradapter` campiona due volte
 a 2 secondi di distanza assumendo che il sonar emetta un dato al secondo. Un
-sonar piu lento o piu veloce cambia la semantica. La versione corretta userebbe
+sonar più lento o più veloce cambia la semantica. La versione corretta userebbe
 i timestamp dei campioni e una finestra temporale esplicita, non il conteggio
 delle letture.
 
-**Il LED del requisito 6 non e pilotato dal nostro sistema.** La logica di
+**Il LED del requisito 6 non è pilotato dal nostro sistema.** La logica di
 accensione vive nel progetto `sonarLed2025` fornito con il corso;
 `sonaradapter` rileva il guasto e rifiuta la richiesta, ma non comanda il LED.
 
 **Configurazione ancora parzialmente cablata.** Gli IP nel file compose vanno
 adattati a mano alla macchina host.
 
-**Le librerie del corso inquinano il classpath.** `2p301.jar` (tuProlog) e un
-fat jar che include una copia arcaica di `org.junit.Assert`, priva di meta dei
+**Le librerie del corso inquinano il classpath.** `2p301.jar` (tuProlog) è un
+fat jar che include una copia arcaica di `org.junit.Assert`, priva di metà dei
 metodi della JUnit moderna. Essendo una dipendenza `flatDir`, Gradle non ne
-conosce le dipendenze transitive e non puo deduplicarla: quella copia oscura la
-JUnit 4.13.2 correttamente risolta. Non e un problema nostro, ma condiziona come
+conosce le dipendenze transitive e non può deduplicarla: quella copia oscura la
+JUnit 4.13.2 correttamente risolta. Non è un problema nostro, ma condiziona come
 si scrivono i test.
 
 **Copertura dei test limitata al dominio della stiva.** Le macchine a stati
