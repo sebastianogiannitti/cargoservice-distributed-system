@@ -67,7 +67,19 @@ cd ../userMock
 docker build -t usermock:2.0 .
 ```
 
-### 2. Avviare
+### 2. Avviare tutto con un comando
+
+```bash
+cd ../uniboyamls
+./rundemo.sh
+```
+
+Lo script rispetta l'ordine imposto dalle dipendenze (vedi
+[Ordine di avvio](#ordine-di-avvio-perche-serve-uno-script)), popola il
+catalogo prodotti e lancia la sequenza di richieste. Chiede di aprire l'arena
+del robot prima di partire.
+
+### 2-bis. Passo per passo (equivalente manuale)
 
 ```bash
 cd ../uniboyamls
@@ -167,3 +179,51 @@ curl -s http://localhost:8761/eureka/apps | grep -oE '<name>[^<]*|<ipAddr>[^<]*'
 ```
 
 Devono comparire `CTXCARGOHOLDSERVICE`, `CTXCARGOSERVICE` e `CTXUSERMOCK`.
+
+## Le due pagine da tenere aperte
+
+| URL | Cosa e' |
+|---|---|
+| **http://localhost:8090** | Arena WebGL del robot virtuale |
+| **http://localhost:8095/hold.html** | GUI della stiva |
+
+L'arena **non e' opzionale**. Il container `wenv` non simula il robot al suo
+interno: distribuisce i comandi di movimento alle scene collegate
+(`execMoveOnAllConnectedScenes`), e la scena e' la pagina WebGL nel browser.
+Senza una scheda aperta il robot compie un passo e si ferma, la richiesta di
+movimento scade e il ciclo di carico non si chiude.
+
+Per la registrazione conviene affiancare le due finestre: a sinistra il robot
+che si muove nell'arena, a destra gli slot che si accendono.
+
+## Ordine di avvio: perche' serve uno script
+
+Alla prima richiesta `productpolice` cerca `ctxcargoservice` su Eureka e subito
+dopo `cargorobot` cerca `ctxbasicrobot`. Se un servizio non si e' ancora
+registrato la discovery ritorna `null` e la `NullPointerException` che ne segue
+(`hostPort must not be null`) cancella il job dell'attore: il contesto resta in
+piedi ma non elabora piu' nulla fino al riavvio.
+
+I tempi di registrazione sono molto diversi fra i servizi — il `basicrobot`
+arriva parecchio dopo gli altri — e Eureka espone le registrazioni con qualche
+decina di secondi di ritardo per via della cache di risposta. Da qui la
+sequenza:
+
+1. avvio dello stack;
+2. attesa che **CTXCARGOSERVICE** e **CTXBASICROBOT** compaiano nel registro;
+3. riavvio del `cargoholdservice`, il cui client Eureka rilegge l'intero
+   registro all'avvio;
+4. popolamento del catalogo prodotti;
+5. avvio della sequenza di richieste.
+
+E' una fragilita' reale del sistema, non dello script: un client di service
+discovery che fallisce con NPE e uccide l'attore, invece di ritentare, non
+tollera un ordine di avvio diverso da quello previsto.
+
+## Il catalogo prodotti
+
+Un MongoDB appena creato e' vuoto: senza prodotti registrati ogni richiesta
+viene rifiutata in `verifyProductID`. [`seedproducts.sh`](../sprint3/uniboyamls/seedproducts.sh)
+inserisce i quattro PID che `usermock` richiede, con pesi che sommano a 700
+(sotto il MAXLOAD di 1000), cosi' i quattro slot si riempiono e la quinta
+richiesta viene rifiutata per stiva piena.
