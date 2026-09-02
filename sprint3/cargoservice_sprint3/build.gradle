@@ -35,7 +35,7 @@ kotlin {
 
 repositories {
     mavenCentral()
-    flatDir {   dirs '../unibolibs'	 }
+    flatDir {   dirs '../../unibolibs'	 }
 }
 
 /*
@@ -145,6 +145,11 @@ sourceSets {
     main.java.srcDirs += 'src/main/java'
     main.java.srcDirs += 'src/main/kotlin'
     main.java.srcDirs += 'src/main/resources'
+    // 'src' come source root comprende anche src/test: senza queste esclusioni
+    // i test verrebbero compilati dentro main, dove kotlin-test non e' sul
+    // classpath, e la compilazione fallirebbe.
+    main.java.exclude 'test/**'
+    main.kotlin.exclude 'test/**'
     test.java.srcDirs += 'src/main/java/test'		//test is specific
     test.java.srcDirs += 'src/main/kotlin/test'
 }

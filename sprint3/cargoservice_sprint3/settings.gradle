@@ -1,1 +1,8 @@
+plugins {
+    // Consente a Gradle di scaricare automaticamente il JDK richiesto dalla
+    // toolchain (17), cosi' il progetto compila anche su macchine con un JDK
+    // diverso installato.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
 rootProject.name = "cargoservice"
