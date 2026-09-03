@@ -227,3 +227,34 @@ viene rifiutata in `verifyProductID`. [`seedproducts.sh`](../sprint3/uniboyamls/
 inserisce i quattro PID che `usermock` richiede, con pesi che sommano a 700
 (sotto il MAXLOAD di 1000), cosi' i quattro slot si riempiono e la quinta
 richiesta viene rifiutata per stiva piena.
+
+## Registrare la demo
+
+La GIF nel README nasce da una registrazione dello schermo con **entrambe le
+finestre affiancate e visibili**.
+
+Prima di premere Invio al prompt di `rundemo.sh`:
+
+1. ricarica con F5 sia l'arena (`:8090`) sia la stiva (`:8095/hold.html`) —
+   il reload azzera la scena del robot, che altrimenti si porta dietro lo
+   stato della corsa precedente;
+2. affianca le due finestre, entrambe in primo piano;
+3. avvia la registrazione, cosi' parti dalla stiva vuota;
+4. premi Invio e riporta subito davanti la finestra dell'arena.
+
+Il ciclo dura circa 100 secondi: quattro caricamenti e, se la stiva si riempie,
+il rifiuto della quinta richiesta.
+
+**Non tutti i take riescono.** Il robot virtuale interrompe i movimenti in modo
+intermittente (`planinterruptedobstacle`) e circa una volta su due il ciclo si
+chiude senza completare tutte le consegne. Si capisce subito: se dopo il primo
+carico lo slot 1 si libera invece di restare occupato, conviene fermarsi e
+rifare da `docker compose down`.
+
+La causa e' nell'ambiente di simulazione fornito con il corso, non nel codice
+del progetto: la scena WebGL segnala ostacoli che la mappa interna del robot
+non conosce. Sono state escluse sperimentalmente due ipotesi alternative, le
+coordinate degli slot e lo step time del robot.
+
+Conversione da video a GIF senza ffmpeg, con VLC e Pillow: si veda
+[docs/img/README.md](img/README.md).
