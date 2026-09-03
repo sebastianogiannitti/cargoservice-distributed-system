@@ -308,12 +308,7 @@ QActor cargorobot context ctxcargoholdservice {
                 TARGETY = coords.second
                 CommUtils.outblue("CargoRobot | Slot=$slot -> coords=($TARGETX,$TARGETY)")
             #]
-            // Lo step time deve corrispondere alla calibrazione dell'ambiente
-            // (stepTimeConfig.json = 245 ms per cella). Il robot virtuale si
-            // muove a tempo, non a celle: un valore piu' alto fa percorrere a
-            // ogni passo piu' di una cella, l'errore si accumula e il robot
-            // finisce contro un muro (planinterruptedobstacle).
-            request basicrobot -m engage : engage($MyName, 245)
+            request basicrobot -m engage : engage($MyName, 330)
         }
     } 
     Transition t1 whenReply engagedone -> goToIOPort
