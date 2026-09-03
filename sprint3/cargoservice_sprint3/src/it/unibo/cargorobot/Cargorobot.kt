@@ -73,7 +73,7 @@ class Cargorobot ( name: String, scope: CoroutineScope, isconfined: Boolean=fals
 								                TARGETX = coords.first
 								                TARGETY = coords.second
 								                CommUtils.outblue("CargoRobot | Slot=$slot -> coords=($TARGETX,$TARGETY)")
-								request("engage", "engage($MyName,330)" ,"basicrobot" )  
+								request("engage", "engage($MyName,245)" ,"basicrobot" )  
 						}
 						//genTimer( actor, state )
 					}
