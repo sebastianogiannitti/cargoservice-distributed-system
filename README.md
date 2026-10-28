@@ -8,6 +8,16 @@ Progetto finale di **Ingegneria dei Sistemi Software** (prof. A. Natali,
 Università di Bologna, a.a. 2024/2025), sviluppato in team da 3 persone lungo
 4 sprint.
 
+> **Project overview (English).** Distributed cargo-loading automation system built
+> as a three-person Software Systems Engineering project at the University of
+> Bologna. Technologies include **Kotlin, QAK actors, Docker, MQTT, CoAP,
+> WebSocket, Gradle and MongoDB**. My contributions focused on **requirements
+> analysis and test planning, the CargoRobot finite-state machine, the
+> SonarAdapter and real-time GUI observability**.
+>
+> The project was developed collaboratively. See [team contributions](#il-team)
+> for the full breakdown and attribution.
+
 > Lo scopo del tema d'anno non era (solo) risolvere il problema, ma avere un
 > **caso di studio su cui ragionare sul processo di costruzione del software**.
 > Questo README è organizzato di conseguenza: prima cosa fa il sistema, poi
@@ -27,7 +37,7 @@ Università di Bologna, a.a. 2024/2025), sviluppato in team da 3 persone lungo
 - [Test](#test)
 - [Il processo: gli sprint](#il-processo-gli-sprint)
 - [Il team](#il-team)
-- [Limiti noti e cosa farei diversamente](#limiti-noti-e-cosa-farei-diversamente)
+- [Limiti noti e possibili miglioramenti](#limiti-noti-e-possibili-miglioramenti)
 
 ---
 
@@ -56,10 +66,6 @@ Il testo integrale del committente è in
 [userDocs/TemaFinale25.pdf](userDocs/TemaFinale25.pdf).
 
 ## Demo
-
-<!-- TODO: inserire qui la GIF della web GUI che si aggiorna durante un carico.
-     Registrare: avvio del sistema, userMock che invia 4 richieste, gli slot
-     che si accendono in push, e un rifiuto per stiva piena. -->
 
 ![Web GUI della stiva](docs/img/gui-demo.gif)
 
@@ -247,7 +253,7 @@ Due immagini vanno costruite in locale prima del primo avvio; la procedura
 completa, incluso il mock che sostituisce il sonar fisico, è in
 [docs/DEMO.md](docs/DEMO.md).
 
-Il file compose avvia 8 servizi: `cargoholdservice` (il nostro sistema),
+Il file compose avvia 9 servizi: `cargoholdservice` (il nostro sistema),
 `cargoserviceqak` (productservice), `basicrobot24` e `wenv` (robot e mondo
 virtuale), `usermock` (client di test), `sonarmock` (sostituto del sonar
 fisico), `mosquitto` (MQTT), `mongodb` ed `eureka` (service discovery).
@@ -322,17 +328,31 @@ presentata alla discussione finale ([slide](docs/presentazione_finale.pdf)):
 | **2** — IoT e hardware | **Setup hardware**: GPIO del Raspberry Pi, script Python per sonar HC-SR04 e LED | Setup di rete: broker MQTT e interfacciamento tra componenti | Adapter logic: `sonaradapter`, da eventi fisici a risposte logiche |
 | **3** — Web GUI e monitoraggio | **Test di integrazione** tra moduli e componenti | Produzione dei deliverable: containerizzazione, network Docker, configurazioni | System observability e GUI |
 
-Il mio contributo principale è quindi la **modellazione della stiva** — lo stesso
-componente estratto in `CargoHold` e coperto dai test di questo repository — il
-**livello hardware** del sonar ([script Python](sprint2/sonarLed2025/resources/python/))
-e la **verifica di integrazione**.
+### Il mio contributo
+
+Il mio lavoro nel progetto ha riguardato principalmente:
+
+- **Sprint 0:** analisi del problema e definizione del test plan;
+- **Sprint 1:** modellazione della macchina a stati del `cargorobot` e analisi
+  dei casi limite del processo di carico;
+- **Sprint 2:** logica del `sonaradapter`, per collegare gli eventi del sensore
+  alle decisioni del sistema;
+- **Sprint 3:** osservabilità dello stato della stiva e interfaccia web GUI.
+
+La tabella precedente documenta anche il lavoro svolto da Diego Bruno e
+Marco Crisafulli: questo è un **progetto di gruppo**, non individuale.
+
+La documentazione di questa versione è stata inizialmente riorganizzata da
+**Diego Bruno** nella sua
+[repository dedicata](https://github.com/diebru/cargoservice-distributed-system),
+da cui deriva questa copia mantenendo la cronologia Git.
 
 Il repository originale del team, con la storia completa dei commit, è
 [MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti](https://github.com/MarcoCrisafulli5/ISS2025-BrunoCrisafulliGiannitti).
 
-## Limiti noti e cosa farei diversamente
+## Limiti noti e possibili miglioramenti
 
-Elenco onesto di ciò che, rifacendolo, cambierei.
+Aspetti individuati durante lo sviluppo e punti su cui intervenire in una versione successiva.
 
 **Sincronizzazione basata su ritardi.** In più punti il modello usa `delay`
 fisso al posto di una vera attesa di evento — per esempio `delay 5000` dopo aver
